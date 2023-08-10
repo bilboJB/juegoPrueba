@@ -30,6 +30,15 @@ def player_Animacion():
         if player_Index > len(player_Run):
             player_Index = 0
         return player_Run[int(player_Index)]
+def movimiento_Proyectil(proyectil_List):
+    if proyectil_List:
+        for proyectil_Rect in proyectil_List:
+            proyectil_Rect.x +=3
+            screen.blit(proyectil,proyectil_Rect)
+        proyectil_List = [proyectil for proyectil in proyectil_List if proyectil.x < 900]
+        return proyectil_List
+    else:
+        return []
 screen = pygame.display.set_mode((800,400))
 pygame.display.set_caption("Proyecto")
 reloj = pygame.time.Clock()
@@ -37,6 +46,9 @@ fondo = pygame.Surface((800,400))
 fondo.fill("cyan4")
 piso = pygame.Surface((800,100))
 piso.fill("darkgoldenrod")
+proyectil = pygame.Surface((5,3))
+proyectil.fill("white")
+proyectil_Rect_List = []
 font = pygame.font.Font("font/NotJamSlab14.ttf",50)
 texto = font.render("le bomb",False,"cornsilk")
 textoOver = font.render("GAME OVER",False,"white")
@@ -76,6 +88,8 @@ while True:
             if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_SPACE and player_Rect.bottom >= 300:
                     gravedad = -15
+                if evento.key == pygame.K_RETURN and len(proyectil_Rect_List)<8:
+                    proyectil_Rect_List.append(proyectil.get_rect(midleft = player_Rect.midright))
             if evento.type == timer_enemigos:
                 if randint(0,1):
                     enemigos_rect_list.append(fantasma_1.get_rect(midbottom = (900,250)))
@@ -104,6 +118,7 @@ while True:
         gravedad +=1
         player_Rect.y += gravedad
         enemigos_rect_list = movimiento_enemigo(enemigos_rect_list)
+        proyectil_Rect_List = movimiento_Proyectil(proyectil_Rect_List)
         if player_Rect.bottom >= 300:
             player_Rect.bottom = 300
         player_Surf_Actual = player_Animacion()
@@ -113,6 +128,7 @@ while True:
         screen.fill("cyan4")
         screen.blit(textoOver,texto_Rect)
         enemigos_rect_list.clear()
+        proyectil_Rect_List.clear()
         player_Rect.bottom = 300
     pygame.display.update()
     reloj.tick(60)
