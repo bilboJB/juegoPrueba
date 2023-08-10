@@ -64,7 +64,7 @@ gravedad = 0
 timer_enemigos = pygame.USEREVENT + 1
 pygame.time.set_timer(timer_enemigos,1000)
 timer_Fantasma = pygame.USEREVENT + 2
-pygame.time.set_timer(timer_Fantasma,420)
+pygame.time.set_timer(timer_Fantasma,450)
 timer_Slime = pygame.USEREVENT + 3
 pygame.time.set_timer(timer_Slime,500)
 while True:
