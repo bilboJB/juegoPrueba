@@ -120,6 +120,7 @@ while True:
         else:
             if evento.type == pygame.KEYDOWN and evento.key == pygame.K_SPACE:
                 game_Active = True
+                puntaje = 0
         
     if game_Active:
         screen.blit(fondo,(0,0))
@@ -148,6 +149,5 @@ while True:
         enemigos_rect_list.clear()
         proyectil_Rect_List.clear()
         player_Rect.bottom = 300
-        puntaje = 0
     pygame.display.update()
     reloj.tick(60)
