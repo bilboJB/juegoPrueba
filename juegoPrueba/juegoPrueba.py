@@ -3,7 +3,7 @@ from sys import exit
 from random import randint
 pygame.init()
 game_Active = True
-def movimiento_enemigo(enemigos_list):
+def movimiento_Enemigo(enemigos_list):
     if enemigos_list:
         for enemigos_rect in enemigos_list:
             enemigos_rect.x -= 5
@@ -15,7 +15,7 @@ def movimiento_enemigo(enemigos_list):
         return enemigos_list
     else:
         return []
-def colisiones(player,enemigos_list):
+def colisiones_Player(player,enemigos_list):
     if enemigos_list:
         for enemigos_rect in enemigos_list:
              if player.colliderect(enemigos_rect):
@@ -25,6 +25,9 @@ def player_Animacion():
     global player_Index
     if player_Rect.bottom < 300:
         return player_Jump
+    elif player_Index == 10:
+        player_Index = 0
+        return player_Shoot
     else:
         player_Index += 0.1
         if player_Index > len(player_Run):
@@ -39,6 +42,10 @@ def movimiento_Proyectil(proyectil_List):
         return proyectil_List
     else:
         return []
+def mostrar_Score(puntos):
+    score_Surf = font.render(f"{puntos}",False,"cornsilk")
+    score_Rect = score_Surf.get_rect(center = (400,50))
+    screen.blit(score_Surf,score_Rect)
 screen = pygame.display.set_mode((800,400))
 pygame.display.set_caption("Proyecto")
 reloj = pygame.time.Clock()
@@ -52,7 +59,7 @@ proyectil_Rect_List = []
 font = pygame.font.Font("font/NotJamSlab14.ttf",50)
 texto = font.render("le bomb",False,"cornsilk")
 textoOver = font.render("GAME OVER",False,"white")
-texto_Rect = texto.get_rect(center = (300,50))
+texto_Rect = texto.get_rect(center = (300,200))
 fantasma_1 = pygame.image.load("Characters/Enemies/sprites/Ghost/ghost1.png").convert_alpha()
 fantasma_2 = pygame.image.load("Characters/Enemies/sprites/Ghost/ghost2.png").convert_alpha()
 fantasma = [fantasma_1,fantasma_2]
@@ -70,9 +77,11 @@ player_Run3 = pygame.image.load("Characters/Player/sprites/Player-run/player-run
 player_Index = 0
 player_Run = [player_Run1,player_Run2,player_Run3]
 player_Jump = pygame.image.load("Characters/Player/sprites/Player-jump/player-jump1.png").convert_alpha()
+player_Shoot = pygame.image.load("Characters/Player/sprites/Player-shoot/player-shoot3.png").convert_alpha()
 player_Surf = player_Run[player_Index]
 player_Rect = player_Surf.get_rect(bottomright = (80,300))
 gravedad = 0
+puntaje = 0
 timer_enemigos = pygame.USEREVENT + 1
 pygame.time.set_timer(timer_enemigos,1000)
 timer_Fantasma = pygame.USEREVENT + 2
@@ -90,6 +99,7 @@ while True:
                     gravedad = -15
                 if evento.key == pygame.K_RETURN and len(proyectil_Rect_List)<8:
                     proyectil_Rect_List.append(proyectil.get_rect(midleft = player_Rect.midright))
+                    player_Index = 10
             if evento.type == timer_enemigos:
                 if randint(0,1):
                     enemigos_rect_list.append(fantasma_1.get_rect(midbottom = (900,250)))
@@ -114,21 +124,30 @@ while True:
     if game_Active:
         screen.blit(fondo,(0,0))
         screen.blit(piso,(0,300))
-        screen.blit(texto,texto_Rect)
-        gravedad +=1
+        if gravedad < 100:
+            gravedad +=1
         player_Rect.y += gravedad
-        enemigos_rect_list = movimiento_enemigo(enemigos_rect_list)
+        enemigos_rect_list = movimiento_Enemigo(enemigos_rect_list)
         proyectil_Rect_List = movimiento_Proyectil(proyectil_Rect_List)
         if player_Rect.bottom >= 300:
             player_Rect.bottom = 300
+        for proyectils in proyectil_Rect_List:
+            for enemigo in enemigos_rect_list:
+                if proyectils.colliderect(enemigo):
+                    proyectil_Rect_List.remove(proyectils)
+                    enemigos_rect_list.remove(enemigo)
+                    puntaje += 1
         player_Surf_Actual = player_Animacion()
         screen.blit(player_Surf_Actual,player_Rect)
-        game_Active = colisiones(player_Rect,enemigos_rect_list)
+        mostrar_Score(puntaje)
+        game_Active = colisiones_Player(player_Rect,enemigos_rect_list)
     else:
         screen.fill("cyan4")
         screen.blit(textoOver,texto_Rect)
+        mostrar_Score(puntaje)
         enemigos_rect_list.clear()
         proyectil_Rect_List.clear()
         player_Rect.bottom = 300
+        puntaje = 0
     pygame.display.update()
     reloj.tick(60)
